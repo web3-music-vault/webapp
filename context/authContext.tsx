@@ -59,9 +59,9 @@ export function AuthProvider({ children }: Props) {
             const loginToWallet =  async() => {
                 try{
                     const userInfo = await login(publicKey?.toString(),nonce, signature)
-                    console.log(userInfo)
-                    setNonceId(userInfo.nonce)
-                    setToken(userInfo.token)
+                    // console.log(userInfo)
+                    // setNonceId(userInfo.nonce)
+                    // setToken(userInfo.token)
                 }catch(e){
                     console.error(e)
                 }

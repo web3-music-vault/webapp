@@ -2,7 +2,10 @@ const crypto = require('crypto');
 const AWS = require('aws-sdk');
 AWS.config.region = process.env.REGION
 
-const cognitoidentity = new AWS.CognitoIdentity();
+const cognitoidentity = new AWS.CognitoIdentity({
+    accessKeyId: process.env.IDPOOL_ACCESS_KEY,
+    secretAccessKey: process.env.IDPOOL_SECRET_KEY
+});
 import nacl from 'tweetnacl'
 import bs58 from 'bs58'
 import { createMessage } from '../../../lib/createMessage';
