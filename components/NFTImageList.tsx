@@ -309,6 +309,7 @@ export default function NFTImageList({ walletId, userId }: { walletId: string, u
                                 position="top"
                                 actionIcon={
                                     <IconButton
+                                        disabled={libraryLoading}
                                         sx={{ color: 'white' }}
                                         aria-label={`star ${item.name}`}
                                     >
