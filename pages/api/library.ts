@@ -29,7 +29,7 @@ export type DecodedAccessToken = {
   isActive: string;
 }
 
-export  default async function handler(
+export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<LibraryItem[]>
 ) {
@@ -38,41 +38,50 @@ export  default async function handler(
 
   // console.log('req.headers.authorization', req.headers.authorization)
   let userId;
-  if(req.headers.authorization){
-    const jwt = req.headers.authorization.split(' ')[1]
-    const decodedJWT: DecodedJWT | any = jwtDecode(jwt);
-    const accessToken: DecodedAccessToken = {
-      token: jwt,
-      userId: decodedJWT.sub,
-      expiresAt: decodedJWT.exp,
-      email: decodedJWT.email,
-      isActive: decodedJWT.isActive,
-    };
-    // user should be in here
-    // make sure this token is not expired
-   if(!( !(Date.now() / 1000 > (accessToken?.expiresAt ?? 0)))){
-    // not authorized
-      res.status(401)
-      return;
-   }
+  if (req.headers.authorization) {
+    let decodedJWT: DecodedJWT | any
 
-   userId = accessToken.userId
-  }else{
+    const authorizationHeader = req.headers.authorization.split(' ')
+    const jwt = authorizationHeader[1]
+    const authorizationType = authorizationHeader[0]
+    if (authorizationType == 'Bearer') {
+      decodedJWT = jwtDecode(jwt);
+    } else {
+      userId = await getUserFromJWT(req, res, userId);
+    }
 
-    const session = await unstable_getServerSession(req, res, authOptions)
-    console.log('session', session)
-    userId = (session?.user as any).id
-    
+    if (decodedJWT) {
+      const accessToken: DecodedAccessToken = {
+        token: jwt,
+        userId: decodedJWT.sub,
+        expiresAt: decodedJWT.exp,
+        email: decodedJWT.email,
+        isActive: decodedJWT.isActive,
+      };
+      // user should be in here
+      // make sure this token is not expired
+      if (!(!(Date.now() / 1000 > (accessToken?.expiresAt ?? 0)))) {
+        // not authorized
+        res.status(401)
+        return;
+      }
+
+      userId = accessToken.userId
+    }
+
+
+  } else {
+    userId = await getUserFromJWT(req, res, userId);
 
   }
 
-  if(!userId){
+  if (!userId) {
     res.status(401)
     return;
   }
 
 
-  if(req.method === 'GET'){
+  if (req.method === 'GET') {
     const item = await dynamo.get({
       Key: {
         userId: userId
@@ -80,17 +89,17 @@ export  default async function handler(
     })
 
     console.log('GET', item)
-    if(!item.Item){
+    if (!item.Item) {
       res.status(404).json({} as LibraryItem[])
       return;
     }
     res.status(200).json(item.Item as LibraryItem[])
   }
 
-  if(req.method === 'POST'){
+  if (req.method === 'POST') {
     const body = JSON.parse(req.body)
 
-    const {Attributes} = await dynamo.update({
+    const { Attributes } = await dynamo.update({
       Key: {
         userId: userId
       },
@@ -107,4 +116,11 @@ export  default async function handler(
 
 }
 
+
+async function getUserFromJWT(req: NextApiRequest, res: NextApiResponse<LibraryItem[]>, userId: any) {
+  const session = await unstable_getServerSession(req, res, authOptions);
+  console.log('session', session);
+  userId = (session?.user as any).id;
+  return userId;
+}
 
