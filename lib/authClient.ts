@@ -41,7 +41,7 @@ export async function login(walletId: string, nonce: string, signature:string){
             signature,
             walletId,
             nonce,
-            callbackUrl:'/'
+            callbackUrl:'/library/'
           })
 
         console.log('signInResults', signInResults)
