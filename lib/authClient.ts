@@ -30,27 +30,39 @@ export async function login(walletId: string, nonce: string, signature:string){
     formData.append('signature', signature);
     formData.append('nonce', nonce);
 
-    signIn("credentials", {
-        // message: JSON.stringify({
-        //     walletId,
-        //     signature,
-        //     nonce
-        // }),
-        redirect: false,
-        signature,
-        walletId,
-        nonce,
-        callbackUrl:'/library/'
-      })
+    try{
+        const signInResults =  await signIn("credentials", {
+            // message: JSON.stringify({
+            //     walletId,
+            //     signature,
+            //     nonce
+            // }),
+            redirect: false,
+            signature,
+            walletId,
+            nonce,
+            callbackUrl:'/'
+          })
 
-    const response = await fetch('/api/auth/callback/credentials', {
-        method: 'POST', 
-        credentials: 'include',
-        body: formData
-    })
-    console.log(response.headers)
-    const json = await response.json()
-    return json
+        console.log('signInResults', signInResults)
+    }catch(e){
+        console.error(e)
+    }
+
+
+    try{
+        const response = await fetch('/api/auth/callback/credentials', {
+            method: 'POST', 
+            credentials: 'include',
+            body: formData
+        })
+        console.log(response.headers)
+        const json = await response.json()
+        return json
+    }catch(e){
+        console.error(e)
+    }
+
 }
 
 
