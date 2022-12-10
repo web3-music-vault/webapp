@@ -8,7 +8,7 @@ import { clusterApiUrl } from '@solana/web3.js';
 import type { AppProps } from 'next/app';
 import { SessionProvider } from "next-auth/react"
 import { useRouter } from 'next/router';
-import React, { FC, useCallback, useMemo } from 'react';
+import React, { FC, useCallback, useMemo, useState } from 'react';
 
 import { AuthProvider } from '../context/authContext';
 
@@ -22,6 +22,8 @@ const Noop = ({ children }: any) => <>{children}</>;
 
 const App: FC<AppProps> = ({ Component, pageProps: { session, ...pageProps } }: any) => {
     const router = useRouter();
+    const noContextRoutesDefaultValue = ['/oauth/verify_scopes', '/privacy'];
+    const [noContextRoutes] = useState(noContextRoutesDefaultValue)
 
     const ContextProvider = Component.provider || Noop;
 
@@ -69,12 +71,12 @@ const App: FC<AppProps> = ({ Component, pageProps: { session, ...pageProps } }: 
         // [enqueueSnackbar]
     );
 
-    const NoContextRoutes = ['/oauth/verify_scopes'];
+   
 
 
     return (
         <>
-            {NoContextRoutes.includes(router.pathname) ? (
+            {noContextRoutes.includes(router.pathname) ? (
                 <Component {...pageProps} />) :
                 (<ContextProvider>
                     <SessionProvider session={session}>
@@ -91,9 +93,6 @@ const App: FC<AppProps> = ({ Component, pageProps: { session, ...pageProps } }: 
                 </ContextProvider>
                 )}
         </>
-
-
-
 
     );
 };
