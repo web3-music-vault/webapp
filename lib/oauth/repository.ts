@@ -21,12 +21,12 @@ import tokensdb from "./tokensdb";
 
 export const inMemoryClientRepository: OAuthClientRepository = {
   async getByIdentifier(clientId: string): Promise<OAuthClient> {
-    console.log('OAuthScopeRepository.getByIdentifier','clientId', clientId)
+    console.log('OAuthScopeRepository.getByIdentifier', 'clientId', clientId)
     return inMemoryDatabase.clients[clientId];
   },
 
   async isClientValid(grantType: GrantIdentifier, client: OAuthClient, clientSecret?: string): Promise<boolean> {
-    console.log('OAuthScopeRepository.isClientValid','grantType', grantType, 'client',client)
+    console.log('OAuthScopeRepository.isClientValid', 'grantType', grantType, 'client', client)
 
     if (client.secret !== clientSecret) {
       return false;
@@ -42,7 +42,7 @@ export const inMemoryClientRepository: OAuthClientRepository = {
 
 export const inMemoryScopeRepository: OAuthScopeRepository = {
   async getAllByIdentifiers(scopeNames: string[]): Promise<OAuthScope[]> {
-    console.log('OAuthScopeRepository.getAllByIdentifiers','scopeNames', scopeNames)
+    console.log('OAuthScopeRepository.getAllByIdentifiers', 'scopeNames', scopeNames)
     return Object.values(inMemoryDatabase.scopes).filter(scope => scopeNames.includes(scope.name));
   },
   async finalize(
@@ -56,14 +56,32 @@ export const inMemoryScopeRepository: OAuthScopeRepository = {
   },
 };
 
-export const inMemoryAccessTokenRepository: OAuthTokenRepository = {
+export const dbAccessTokenRepository: OAuthTokenRepository = {
+
   async revoke(accessToken: OAuthToken): Promise<void> {
     console.log('OAuthTokenRepository.revoke(accessToken=', accessToken)
 
-    const token = inMemoryDatabase.tokens[accessToken.accessToken];
+    const { Item } = await tokensdb.get({
+      Key: {
+        code: accessToken.accessToken
+      }
+    });
+
+    if (!Item) {
+      console.log('No token found to revoke', ' accessToken.accessToken', accessToken.accessToken)
+    }
+
+    console.log('Found  accessToken - setting date to 0', Item)
+    const token = Item?.content as OAuthToken;
     token.accessTokenExpiresAt = new Date(0);
     token.refreshTokenExpiresAt = new Date(0);
-    inMemoryDatabase.tokens[accessToken.accessToken] = token;
+    try {
+      await this.persist(token)
+    } catch (e) {
+      console.error(e)
+    }
+
+
   },
   async issueToken(client: OAuthClient, scopes: OAuthScope[], user: OAuthUser): Promise<OAuthToken> {
     console.log('OAuthTokenRepository.issueToken(client=', client, 'scopes=', scopes, 'user=', user)
@@ -87,17 +105,17 @@ export const inMemoryAccessTokenRepository: OAuthTokenRepository = {
     await tokensdb.put({
       Item: item
     })
-    
+
     // inMemoryDatabase.tokens[accessToken.accessToken] = accessToken;
   },
   async getByRefreshToken(refreshTokenToken: string): Promise<OAuthToken> {
     console.log('OAuthTokenRepository.persist(refreshTokenToken=', refreshTokenToken)
 
-    const  {Items} = await tokensdb.getByRefreshToken(refreshTokenToken)
-    if(Items && Items.length == 1){
+    const { Items } = await tokensdb.getByRefreshToken(refreshTokenToken)
+    if (Items && Items.length == 1) {
       console.log('retrieved authCode from:' + JSON.stringify(Items))
       return Items[0].content as OAuthToken;
-    }    
+    }
     throw new Error("token not found");
   },
   async isRefreshTokenRevoked(token: OAuthToken): Promise<boolean> {
@@ -166,19 +184,19 @@ export const inMemoryAuthCodeRepository: OAuthAuthCodeRepository = {
   async getByIdentifier(authCodeCode: string): Promise<OAuthAuthCode> {
     console.log('OAuthAuthCodeRepository.getByIdentifier', 'authCodeCode', authCodeCode)
 
-    const {Item} = await dynamo.get({
+    const { Item } = await dynamo.get({
       Key: {
         code: authCodeCode
       }
     })
 
-    if(Item){
+    if (Item) {
       console.log('retrieved authCode from:' + JSON.stringify(Item?.content))
       return Item.content as OAuthAuthCode;
     }
 
     throw new Error("Not AuthCode found");
-    
+
     // return authCode
   },
   async revoke(authCodeCode: string): Promise<void> {
@@ -194,7 +212,7 @@ export const inMemoryAuthCodeRepository: OAuthAuthCodeRepository = {
         ":expiresAt": new Date(0).getTime()
       },
     })
-   
+
     // inMemoryDatabase.authCodes[authCodeCode].expiresAt = new Date(0);
   },
 };
@@ -206,7 +224,7 @@ export const inMemoryUserRepository: OAuthUserRepository = {
     grantType?: GrantIdentifier,
     client?: OAuthClient,
   ): Promise<OAuthUser | undefined> {
-    console.log('OAuthUserRepository.getUserByCredentials', 'identifier', identifier,'grantType', grantType, 'client', client)
+    console.log('OAuthUserRepository.getUserByCredentials', 'identifier', identifier, 'grantType', grantType, 'client', client)
     return {
       id: identifier
     }
@@ -217,7 +235,7 @@ export const inMemoryUserRepository: OAuthUserRepository = {
   async extraAccessTokenFields(user: OAuthUser): Promise<ExtraAccessTokenFields | undefined> {
     console.log('OAuthUserRepository.extraAccessTokenFields', 'user', user)
     return {
-     
+
     };
   },
 };

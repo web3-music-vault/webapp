@@ -1,7 +1,7 @@
 import { AuthorizationServer, DateInterval, JwtService } from "@jmondi/oauth2-server";
 
 import {
-  inMemoryAccessTokenRepository,
+  dbAccessTokenRepository,
   inMemoryAuthCodeRepository,
   inMemoryClientRepository,
   inMemoryScopeRepository,
@@ -10,7 +10,7 @@ import {
 
 const clientRepository = inMemoryClientRepository;
 const authCodeRepository = inMemoryAuthCodeRepository;
-const tokenRepository = inMemoryAccessTokenRepository;
+const tokenRepository = dbAccessTokenRepository;
 const scopeRepository = inMemoryScopeRepository;
 const userRepository = inMemoryUserRepository;
 
