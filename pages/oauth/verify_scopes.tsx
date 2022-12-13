@@ -5,13 +5,13 @@ import Button from '@mui/material/Button';
 import Stack from "@mui/material/Stack";
 import styles from '../../styles/Home.module.css';
 
-import { dbClientRepository, inMemoryScopeRepository } from "../../lib/oauth/repository";
+import { inMemoryClientRepository, inMemoryScopeRepository } from "../../lib/oauth/repository";
 
 export async function getServerSideProps(context: any) {
   const { scope, client_id } = context.query;
 
   const scopes = await inMemoryScopeRepository.getAllByIdentifiers(scope);
-  const client = await dbClientRepository.getByIdentifier(client_id);
+  const client = await inMemoryClientRepository.getByIdentifier(client_id);
 
   return {
     props: { scopes, client },
