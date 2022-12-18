@@ -55,7 +55,9 @@ const App: FC<AppProps> = ({ Component, pageProps: { session, ...pageProps } }: 
                     new SolflareWalletAdapter(),
                     new SolletWalletAdapter({ network }),
                     new SolletExtensionWalletAdapter({ network }),
-                    new TorusWalletAdapter(),
+                    new TorusWalletAdapter({ params:{
+                        apiKey: process.env.WEB3AUTH_CLIENT_ID
+                    }}),
                 ],
         // eslint-disable-next-line react-hooks/exhaustive-deps
         []

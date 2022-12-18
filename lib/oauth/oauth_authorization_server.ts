@@ -14,6 +14,7 @@ const tokenRepository = dbAccessTokenRepository;
 const scopeRepository = inMemoryScopeRepository;
 const userRepository = inMemoryUserRepository;
 
+// TODO is this the secret?
 const jwtService = new JwtService("secret secret secret");
 
 const authorizationServer = new AuthorizationServer(
@@ -32,9 +33,9 @@ authorizationServer.setOptions({
 })
 
 
-authorizationServer.enableGrantType("authorization_code", new DateInterval("15m"));
-authorizationServer.enableGrantType("client_credentials", new DateInterval("15m"));
-authorizationServer.enableGrantType("refresh_token", new DateInterval("15m"));
+authorizationServer.enableGrantType("authorization_code", new DateInterval("1h"));
+authorizationServer.enableGrantType("client_credentials", new DateInterval("1h"));
+authorizationServer.enableGrantType("refresh_token", new DateInterval("1h"));
 
 export { authorizationServer as inMemoryAuthorizationServer };
 

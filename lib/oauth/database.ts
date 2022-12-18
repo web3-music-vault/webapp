@@ -11,19 +11,14 @@ export interface InMemory {
 
 export const playNFTMusicScope: OAuthScope = {
   name: "library.read",
-  description: "Allow your unlocked web3 music vault to play on Alexa",
-};
-
-export const sampleScope2: OAuthScope = {
-  name: "contacts.write",
-  description: "Allow write access to contacts",
+  description: "Allow your unlocked web3 music to play on Alexa",
 };
 
 // TODO move this to database
 export const alexaClient: OAuthClient = {
   allowedGrants: ["authorization_code","refresh_token"],
-  redirectUris: ['https://alexa.amazon.co.jp/api/skill/link/M2P5L2QTIQJR7V', 'https://layla.amazon.com/api/skill/link/M2P5L2QTIQJR7V', 'https://pitangui.amazon.com/api/skill/link/M2P5L2QTIQJR7V'],
-  scopes: [playNFTMusicScope, sampleScope2],
+  redirectUris: [process.env.ALEXA_REDIRECTURI_1 as string, process.env.ALEXA_REDIRECTURI_2 as string, process.env.ALEXA_REDIRECTURI_3 as string,],
+  scopes: [playNFTMusicScope],
   id: "alexa-skill-web3-music-vault",
   name: "Alexa Web3 Music Vault Skill",
   secret: process.env.ALEXA_SKILL_CLIENT_SECRET
