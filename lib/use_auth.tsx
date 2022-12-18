@@ -5,7 +5,7 @@ import querystring from "querystring";
 import { createContext, useContext, useState } from "react";
 import { base64urlencode } from "@jmondi/oauth2-server";
 
-import { alexaClient, playNFTMusicScope, sampleScope2 } from "./oauth/database";
+import { alexaClient, playNFTMusicScope } from "./oauth/database";
 import { destroyCookie, parseCookies, setCookie } from "nookies";
 
 type DecodedJWT = {
