@@ -73,6 +73,11 @@ export default function NFTImageList({ walletId, userId }: { walletId: string, u
                 setLibraryLoaded(true)
                 setLibraryLoading(false)
 
+            }).catch(e => {
+                console.error('unable to load library', e)
+                setLibraryItems([])
+                setLibraryLoaded(true)
+                setLibraryLoading(false)
             })
     }, [])
 
@@ -176,7 +181,8 @@ export default function NFTImageList({ walletId, userId }: { walletId: string, u
         }
 
 
-        if (prevLibraryItems.libraryItems && libraryItems && !arraysEqual(prevLibraryItems.libraryItems, libraryItems)) {
+        if ((!prevLibraryItems.libraryItems &&  libraryItems)|| 
+            prevLibraryItems.libraryItems && libraryItems && !arraysEqual(prevLibraryItems.libraryItems, libraryItems)) {
             setUpdatingData(true)
             updateData()
                 // make sure to catch any error

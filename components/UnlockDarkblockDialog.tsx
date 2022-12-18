@@ -99,6 +99,12 @@ export default function UnlockMusicDialog({ nftInfo, item, walletId, onClose, on
         
           });
 
+          // only support mp3 for now
+          if (type !== 'encrypted(audio/mpeg)') {
+            return;
+          }
+
+
           if(!artId){
             throw new Error('Unknown artifact Id (artId)')
           }
