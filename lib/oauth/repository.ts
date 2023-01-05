@@ -86,13 +86,11 @@ export const dbAccessTokenRepository: OAuthTokenRepository = {
   async issueToken(client: OAuthClient, scopes: OAuthScope[], user: OAuthUser): Promise<OAuthToken> {
     console.log('OAuthTokenRepository.issueToken(client=', client, 'scopes=', scopes, 'user=', user)
     const oneHourInFuture = new DateInterval("1h").getEndDate();
-    const oneYearInFuture = new DateInterval("360d").getEndDate();
-
 
     return <OAuthToken>{
       accessToken: uuid.v4(),
       accessTokenExpiresAt: oneHourInFuture,
-      refreshTokenExpiresAt: null,
+      refreshTokenExpiresAt: oneHourInFuture,
       client,
       user,
       scopes: [],
@@ -123,8 +121,7 @@ export const dbAccessTokenRepository: OAuthTokenRepository = {
     if (Items && Items.length == 1) {
       console.log('retrieved authCode from:' + JSON.stringify( Items[0].content))
       const token =  Items[0].content;
-      // const refreshTokenExpiresAt = new Date(token.refreshTokenExpiresAt);
-      const refreshTokenExpiresAt = null
+      const refreshTokenExpiresAt = new Date(token.refreshTokenExpiresAt);
       const tokenForDB = {
         ...token,
         refreshTokenExpiresAt
@@ -140,8 +137,7 @@ export const dbAccessTokenRepository: OAuthTokenRepository = {
   async issueRefreshToken(token): Promise<OAuthToken> {
     console.log('OAuthTokenRepository.issueRefreshToken(token=', token)
     const refreshToken = uuid.v4();
-    // const refreshTokenExpiresAt = new DateInterval("360d").getEndDate();
-    const refreshTokenExpiresAt = null
+    const refreshTokenExpiresAt = new DateInterval("1h").getEndDate();
 
     const tokenForDB = {
       ...token,
@@ -155,12 +151,10 @@ export const dbAccessTokenRepository: OAuthTokenRepository = {
         Key: {
           code: token.accessToken,
         },
-        UpdateExpression: `set content.refreshToken = :refreshToken`,
-        // UpdateExpression: `set content.refreshToken = :refreshToken, content.refreshTokenExpiresAt = :refreshTokenExpiresAt`,
-
+        UpdateExpression: `set content.refreshToken = :refreshToken, content.refreshTokenExpiresAt = :refreshTokenExpiresAt`,
         ExpressionAttributeValues: {
           ":refreshToken": tokenForDB.refreshToken,
-          // ":refreshTokenExpiresAt": tokenForDB.refreshTokenExpiresAt?.toISOString()
+          ":refreshTokenExpiresAt": tokenForDB.refreshTokenExpiresAt.toISOString()
         },
         ReturnValues: 'ALL_NEW'
       })
