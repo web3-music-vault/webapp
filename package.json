@@ -34,7 +34,7 @@
     "@aws-sdk/client-dynamodb": "^3.204.0",
     "@emotion/react": "^11.10.0",
     "@emotion/styled": "^11.10.0",
-    "@jmondi/oauth2-server": "^2.5.0",
+    "@jmondi/oauth2-server": "^2.6.0",
     "@mui/icons-material": "^5.8.4",
     "@mui/material": "^5.10.15",
     "@mui/x-data-grid": "^5.17.13",
