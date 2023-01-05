@@ -92,7 +92,7 @@ export const dbAccessTokenRepository: OAuthTokenRepository = {
     return <OAuthToken>{
       accessToken: uuid.v4(),
       accessTokenExpiresAt: oneHourInFuture,
-      refreshTokenExpiresAt: null,
+      refreshTokenExpiresAt: oneYearInFuture,
       client,
       user,
       scopes: [],
@@ -123,8 +123,8 @@ export const dbAccessTokenRepository: OAuthTokenRepository = {
     if (Items && Items.length == 1) {
       console.log('retrieved authCode from:' + JSON.stringify( Items[0].content))
       const token =  Items[0].content;
-      // const refreshTokenExpiresAt = new Date(token.refreshTokenExpiresAt);
-      const refreshTokenExpiresAt = null
+      const refreshTokenExpiresAt = new Date(token.refreshTokenExpiresAt);
+      // const refreshTokenExpiresAt = null
       const tokenForDB = {
         ...token,
         refreshTokenExpiresAt
@@ -140,8 +140,8 @@ export const dbAccessTokenRepository: OAuthTokenRepository = {
   async issueRefreshToken(token): Promise<OAuthToken> {
     console.log('OAuthTokenRepository.issueRefreshToken(token=', token)
     const refreshToken = uuid.v4();
-    // const refreshTokenExpiresAt = new DateInterval("360d").getEndDate();
-    const refreshTokenExpiresAt = null
+    const refreshTokenExpiresAt = new DateInterval("360d").getEndDate();
+    // const refreshTokenExpiresAt = null
 
     const tokenForDB = {
       ...token,
