@@ -14,7 +14,7 @@ export default function AddToLibraryDialog({item, walletId, onClose, onSelected}
   const [open, setOpen] = useState(true);
 
   const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
+  // const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
 
   const handleAddToLibrary = () => {
     setOpen(false)
@@ -32,7 +32,7 @@ export default function AddToLibraryDialog({item, walletId, onClose, onSelected}
         Open responsive dialog
       </Button> */}
       <Dialog
-        fullScreen={fullScreen}
+        // fullScreen={fullScreen}
         open={open}
         onClose={handleClose}
         aria-labelledby="responsive-dialog-title"

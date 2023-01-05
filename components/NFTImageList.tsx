@@ -14,6 +14,7 @@ import { LibraryItem } from '../lib/defs/library-item';
 import { NFTItem } from '../lib/defs/nft-item';
 import { usePrevious } from '../lib/use-previous';
 import { arraysEqual } from '../lib/array-equals'
+import { useMediaQuery } from '@mui/material';
 
 function srcset(image: string, width: number, height: number, rows = 1, cols = 1) {
     return {
@@ -48,7 +49,8 @@ export default function NFTImageList({ walletId, userId }: { walletId: string, u
     const [libraryLoading, setLibraryLoading] = useState(false)
     const [removeLibItem, setRemoveLibItem] = useState(null as null | NFTItem)
     const [updatingData, setUpdatingData] = useState(false)
-
+    const minWidthDesktop = useMediaQuery('(min-width: 768px)');
+    const smallPhone = useMediaQuery('screen and (max-width: 600px)')
 
     useEffect(() => {
         if (isLoading || imageData) {
@@ -265,7 +267,6 @@ export default function NFTImageList({ walletId, userId }: { walletId: string, u
     if (isLoading) return <p>Loading...</p>
     if (!imageData) return <p>No NFTs found</p>
 
-    // TODO make image list responsive
     // TODO load more data after page 1 is loaded.
     // TODO add refresh button
     return (
@@ -280,15 +281,17 @@ export default function NFTImageList({ walletId, userId }: { walletId: string, u
 
             {/**  TODO: handle how to buy music nfts education here*/}
             {imageData && imageData.length == 0 && <div>No NFTs found</div>}
+           
 
             <ImageList
                 sx={{
-                    width: 500,
-                    height: 450,
+                    // width: 350,
+                    // height: 450,
                     // Promote the list into its own layer in Chrome. This costs memory, but helps keeping high FPS.
                     transform: 'translateZ(0)',
                 }}
-                rowHeight={200}
+                cols={imageData.length === 1 ? 1 : (smallPhone ? 1 : (minWidthDesktop ? 3 : 2))}
+                // rowHeight={200}
                 gap={1}
 
             >
@@ -307,12 +310,12 @@ export default function NFTImageList({ walletId, userId }: { walletId: string, u
                             <ImageListItemBar
                                 sx={{
                                     background:
-                                        'linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, ' +
-                                        'rgba(0,0,0,0.3) 70%, rgba(0,0,0,0) 100%)',
+                                        'linear-gradient(to top, rgba(0,0,0,0.7) 0%, ' +
+                                        'rgba(0,0,0,0.6) 70%, rgba(0,0,0,0) 100%)',
                                 }}
                                 title={item.name}
                                 onClick={() => onItemSelected(item)}
-                                position="top"
+                                position="bottom"
                                 actionIcon={
                                     <IconButton
                                         disabled={libraryLoading}

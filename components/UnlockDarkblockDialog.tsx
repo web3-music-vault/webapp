@@ -25,7 +25,7 @@ export default function UnlockMusicDialog({ nftInfo, item, walletId, onClose, on
   const [unlockLibItems, setUnlockLibItems] = useState(null as LibraryItem[] | null);
 
   const theme = useTheme();
-  const fullScreen = useMediaQuery(theme.breakpoints.down('md'));
+  // const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
 
   // when there are unlockable libs save them and close dialog
   // after dialog is closed need to change icon to show minus sign to remove from library
@@ -103,7 +103,6 @@ export default function UnlockMusicDialog({ nftInfo, item, walletId, onClose, on
           if (type !== 'encrypted(audio/mpeg)') {
             return;
           }
-
 
           if(!artId){
             throw new Error('Unknown artifact Id (artId)')
@@ -192,7 +191,7 @@ export default function UnlockMusicDialog({ nftInfo, item, walletId, onClose, on
         Open responsive dialog
       </Button> */}
       <Dialog
-        fullScreen={fullScreen}
+        // fullScreen={fullScreen}
         open={open}
         onClose={handleClose}
         aria-labelledby="responsive-dialog-title"
