@@ -1,5 +1,5 @@
 import * as querystring from "querystring";
-import { setCookie } from "nookies";
+import { destroyCookie, setCookie } from "nookies";
 import { unstable_getServerSession } from "next-auth";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -32,6 +32,11 @@ export default async function Login(req: NextApiRequest, res: NextApiResponse) {
 
   const user = session.user;
   setCookie({ res }, SERVER_COOKIES.user, JSON.stringify(user), {
+    path: "/",
+    httpOnly: true,
+  });
+  
+  destroyCookie({ res }, SERVER_COOKIES.authorized, {
     path: "/",
     httpOnly: true,
   });
