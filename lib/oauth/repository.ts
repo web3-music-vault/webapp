@@ -61,25 +61,22 @@ export const dbAccessTokenRepository: OAuthTokenRepository = {
   async revoke(accessToken: OAuthToken): Promise<void> {
     console.log('OAuthTokenRepository.revoke(accessToken=', accessToken)
 
-    const { Item } = await tokensdb.get({
+    await tokensdb.delete({
       Key: {
         code: accessToken.accessToken
       }
     });
 
-    if (!Item) {
-      console.log('No token found to revoke', ' accessToken.accessToken', accessToken.accessToken)
-    }
 
-    console.log('Found  accessToken - setting date to 0', Item)
-    const token = Item?.content;
-    token.accessTokenExpiresAt = new Date(0).toISOString();
-    token.refreshTokenExpiresAt = new Date(0).toISOString();
-    try {
-      await this.persist(token)
-    } catch (e) {
-      console.error(e)
-    }
+    // console.log('Found  accessToken - setting date to 0', Item)
+    // const token = Item?.content;
+    // token.accessTokenExpiresAt = new Date(0).toISOString();
+    // token.refreshTokenExpiresAt = new Date(0).toISOString();
+    // try {
+    //   await this.persist(token)
+    // } catch (e) {
+    //   console.error(e)
+    // }
 
 
   },
@@ -100,16 +97,21 @@ export const dbAccessTokenRepository: OAuthTokenRepository = {
   },
   async persist(accessToken: OAuthToken): Promise<void> {
     console.log('OAuthTokenRepository.persist(accessToken=', accessToken)
-    const accessTokenExpiresAt = accessToken.accessTokenExpiresAt.toISOString()
+    const accessTokenExpiresAt = accessToken.accessTokenExpiresAt?.toISOString()
+    const refreshTokenExpiresAt = accessToken.refreshTokenExpiresAt?.toISOString()
+
     const accessTokenForDB = {
       ...accessToken,
-      accessTokenExpiresAt
+      accessTokenExpiresAt,
+      refreshTokenExpiresAt
     }
     const item = {
       code: accessToken.accessToken,
       content: accessTokenForDB,
+      refreshToken: accessTokenForDB.refreshToken,
       createdAt: Date.now()
     }
+    console.log('persisting', JSON.stringify(item))
     await tokensdb.put({
       Item: item
     })
@@ -117,18 +119,21 @@ export const dbAccessTokenRepository: OAuthTokenRepository = {
     // inMemoryDatabase.tokens[accessToken.accessToken] = accessToken;
   },
   async getByRefreshToken(refreshTokenToken: string): Promise<OAuthToken> {
-    console.log('OAuthTokenRepository.persist(refreshTokenToken=', refreshTokenToken)
+    console.log('OAuthTokenRepository.getByRefreshToken(refreshTokenToken=', refreshTokenToken)
 
     const { Items } = await tokensdb.getByRefreshToken(refreshTokenToken)
     if (Items && Items.length == 1) {
       console.log('retrieved authCode from:' + JSON.stringify( Items[0].content))
       const token =  Items[0].content;
+      const accessTokenExpiresAt = new Date(token.accessTokenExpiresAt);
       const refreshTokenExpiresAt = new Date(token.refreshTokenExpiresAt);
       // const refreshTokenExpiresAt = null
       const tokenForDB = {
         ...token,
-        refreshTokenExpiresAt
+        refreshTokenExpiresAt,
+        accessTokenExpiresAt
       }
+      console.log('OAuthTokenRepository.getByRefreshToken(refreshTokenToken=', tokenForDB)
       return tokenForDB as OAuthToken;
     }
     throw new Error("token not found");
@@ -155,7 +160,7 @@ export const dbAccessTokenRepository: OAuthTokenRepository = {
         Key: {
           code: token.accessToken,
         },
-        UpdateExpression: `set content.refreshToken = :refreshToken`,
+        UpdateExpression: `set refreshToken = :refreshToken`,
         // UpdateExpression: `set content.refreshToken = :refreshToken, content.refreshTokenExpiresAt = :refreshTokenExpiresAt`,
 
         ExpressionAttributeValues: {

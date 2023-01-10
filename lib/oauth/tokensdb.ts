@@ -27,11 +27,12 @@ export default {
     put: (params: any) => dbClient.put(params).promise(),
     query: (params:any) => dbClient.query(params).promise(),
     update: (params:any) => dbClient.update(params).promise(),
-    delete: (params: any) => dbClient.put(params).promise(),
+    delete: (params: any) => dbClient.delete(params).promise(),
     // TODO possibly add index for refreshToken?
     getByRefreshToken: (refreshToken: string) => {
         return dbClient.query({
             TableName: process.env.AUTH_TOKENS_TABLE_NAME as string,
+            IndexName: 'refreshToken-index',
             KeyConditionExpression: 'refreshToken = :refreshToken',
             ExpressionAttributeValues: {
               ':refreshToken': refreshToken
