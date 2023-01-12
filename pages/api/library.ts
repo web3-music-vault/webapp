@@ -1,11 +1,10 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { unstable_getServerSession } from "next-auth/next"
 
 import dynamo from '../../lib/music-library/dynamo';
 import { LibraryItem } from '../../lib/defs/library-item';
 import jwtDecode from 'jwt-decode';
-import { authOptions } from './auth/[...nextauth]'
+import { getUserFromJWT } from './lib/credential';
 
 
 type DecodedJWT = {
@@ -47,7 +46,7 @@ export default async function handler(
     if (authorizationType == 'Bearer') {
       decodedJWT = jwtDecode(jwt);
     } else {
-      userId = await getUserFromJWT(req, res, userId);
+      userId = await getUserFromJWT(req, res);
     }
 
     if (decodedJWT) {
@@ -71,7 +70,7 @@ export default async function handler(
 
 
   } else {
-    userId = await getUserFromJWT(req, res, userId);
+    userId = await getUserFromJWT(req, res);
 
   }
 
@@ -115,12 +114,3 @@ export default async function handler(
 
 
 }
-
-
-async function getUserFromJWT(req: NextApiRequest, res: NextApiResponse<LibraryItem[]>, userId: any) {
-  const session = await unstable_getServerSession(req, res, authOptions);
-  console.log('session', session);
-  userId = (session?.user as any).id;
-  return userId;
-}
-

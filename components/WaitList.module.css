@@ -1,0 +1,26 @@
+.formWrapper {
+    padding-top: 3rem;
+    display: flex;              /* two column display for input + button */
+    flex-wrap: wrap;
+}
+/* Shared by the input and button so they are the same size and style */
+.formInput {
+    padding: 12px 20px;         
+    box-sizing: border-box;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1rem;
+}
+.formTextInput {
+    flex: 70%;                  /* take up most of the available space */
+    background-color: #232323;
+    color: white;
+}
+.formSubmitButton {
+    flex: 30%;                  /* take up the rest of the space */
+    background-color: #7476ED;
+    color: white;
+}
+.error {
+    color: red;
+}

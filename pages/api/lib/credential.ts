@@ -9,6 +9,10 @@ const cognitoidentity = new AWS.CognitoIdentity({
 import nacl from 'tweetnacl'
 import bs58 from 'bs58'
 import { createMessage } from '../../../lib/createMessage';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { unstable_getServerSession } from 'next-auth';
+import { LibraryItem } from '../../../lib/defs/library-item';
+import { authOptions } from '../auth/[...nextauth]';
 
 export function getIdToken(walletId: string) {
     const param = {
@@ -20,6 +24,11 @@ export function getIdToken(walletId: string) {
     param.Logins[providerName] = walletId;
     return cognitoidentity.getOpenIdTokenForDeveloperIdentity(param).promise();
 }
+
+export async function getUserFromJWT(req: NextApiRequest, res: NextApiResponse<LibraryItem[]>) {
+    const session = await unstable_getServerSession(req, res, authOptions);
+    return (session?.user as any).id;
+  }
 
 export function getCredentials(identityId: string, cognitoOpenIdToken: string) {
     const params = {

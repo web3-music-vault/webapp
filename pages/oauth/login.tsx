@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { useEffect, useMemo, useState } from "react";
 import * as querystring from "querystring";
-import { AuthProvider } from "../../lib/use_auth";
+// import { AuthProvider } from "../../lib/use_auth";
 import { useWallet } from "@solana/wallet-adapter-react";
 import dynamic from "next/dynamic";
 import { useSession, signIn, signOut } from "next-auth/react"
@@ -25,7 +25,7 @@ const SignButtonDynamic = dynamic(
 
 const LoginOAUTH: NextPage = () => {
   const { query } = useRouter();
-  const { publicKey } = useWallet();
+  const { publicKey, disconnecting } = useWallet();
   const { data: session } = useSession()
   const { nonce } = useAuth()
   console.log('publicKey', publicKey)
@@ -34,9 +34,16 @@ const LoginOAUTH: NextPage = () => {
 
   const qs = useMemo(() => querystring.stringify(query), [query]);
 
-  const logout = () => {
-    signOut()
+  const logout = async () => {
+    const signedOut = await signOut()
+    console.log('signed out', signedOut)
   }
+
+  useEffect(()=> {
+    if(disconnecting && publicKey){
+      logout()
+    }
+  }, [disconnecting, publicKey])
 
   useEffect(() => {
 
@@ -76,7 +83,7 @@ const LoginOAUTH: NextPage = () => {
         </h1>
 
         <div className={styles.walletButtons}>
-          {session && publicKey && publicKey.toString() ? <WalletDisconnectButtonDynamic onClick={logout} /> :
+          {session && publicKey && publicKey.toString() ? <WalletDisconnectButtonDynamic /> :
             (publicKey && publicKey.toString()) ? <SignButtonDynamic /> : <WalletMultiButtonDynamic />}
 
         </div>
