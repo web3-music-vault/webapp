@@ -1,11 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
 import ImageList from '@mui/material/ImageList';
+import { useMediaQuery } from '@mui/material';
 import ImageListItem from '@mui/material/ImageListItem';
 import ImageListItemBar from '@mui/material/ImageListItemBar';
 import IconButton from '@mui/material/IconButton';
 import { MinusCircleOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import { debounce } from 'lodash';
-
 import UnlockMusicDialog from './UnlockDarkblockDialog';
 import { FC, useCallback, useEffect, useState } from 'react';
 import AddToLibraryDialog from './AddToLibraryDialog';
@@ -14,7 +14,6 @@ import { LibraryItem } from '../lib/defs/library-item';
 import { NFTItem } from '../lib/defs/nft-item';
 import { usePrevious } from '../lib/use-previous';
 import { arraysEqual } from '../lib/array-equals'
-import { useMediaQuery } from '@mui/material';
 
 function srcset(image: string, width: number, height: number, rows = 1, cols = 1) {
     return {
@@ -33,13 +32,44 @@ export interface QuickNodeNftItem {
     description: string
 }
 
+
+function useNftData(url: string, page: number) {
+    const [hasMore, setHasMore] = useState(false);
+    const [nftData, setData] = useState([] as QuickNodeNftItem[]);
+    const [loading, setLoading] = useState(false)
+    useEffect(() => {
+        let ignore = false;
+        fetch(url)
+            .then(response => response.json())
+            .then(json => {
+
+                console.log('json', json)
+                if (json.totalPages > page) {
+                    setHasMore(true)
+                }else{
+                    setHasMore(false)
+                }
+                setLoading(false);
+                if (!ignore) {
+                    setData((prevData: any) => [...prevData, ...json.assets]);
+                }
+            });
+        return () => {
+            ignore = true;
+        };
+    }, [url, page]);
+    return { nftData, hasMore, loading };
+}
+
 export function NFTImageList({ walletId, userId }: { walletId: string; userId: string; }) {
 
+    const [page, setPage] = useState(1);
+    const query = ''
+    const params = new URLSearchParams({ query, page: page + '' });
+    const { nftData, hasMore, loading } = useNftData(`/api/vault/${walletId}?${params}`, page);
 
     const [selectedItem, setSelectedItem] = useState(null);
     const [selectedDarkBlock, setSelectedDarkBlock] = useState(null);
-    const [imageData, setImageData] = useState(null as null | QuickNodeNftItem[]);
-    const [isLoading, setLoading] = useState(false);
     const [libraryItem, setLibraryItem] = useState(null as null | QuickNodeNftItem);
     const [libraryItems, setLibraryItems] = useState(null as LibraryItem[] | null);
     const prevLibraryItems = usePrevious({ libraryItems, setLibraryItems });
@@ -50,20 +80,6 @@ export function NFTImageList({ walletId, userId }: { walletId: string; userId: s
     const [updatingData, setUpdatingData] = useState(false);
     const minWidthDesktop = useMediaQuery('(min-width: 768px)');
     const smallPhone = useMediaQuery('screen and (max-width: 600px)');
-
-    useEffect(() => {
-        if (isLoading || imageData) {
-            return;
-        }
-        setLoading(true);
-        fetch('/api/vault/' + walletId)
-            .then((res) => res.json())
-            .then((data) => {
-                setImageData(data);
-                setLoading(false);
-            });
-    }, [isLoading, setLoading, walletId, imageData]);
-
 
     const fetchUserLibrary = useCallback(async () => {
         fetch('/api/library/')
@@ -257,9 +273,9 @@ export function NFTImageList({ walletId, userId }: { walletId: string; userId: s
 
     };
 
-    if (isLoading)
+    if (loading)
         return <p>Loading...</p>;
-    if (!imageData)
+    if (!nftData && !loading)
         return <p>No NFTs found</p>;
 
     // TODO load more data after page 1 is loaded.
@@ -270,10 +286,10 @@ export function NFTImageList({ walletId, userId }: { walletId: string; userId: s
             {(selectedDarkBlock && walletId && libraryItem) &&
                 <UnlockMusicDialog nftInfo={libraryItem} item={selectedDarkBlock} walletId={walletId} onUnlocked={onUnlocked} onClose={() => setSelectedDarkBlock(null)}></UnlockMusicDialog>}
             {(selectedItem && walletId) &&
-                <AddToLibraryDialog item={selectedItem} walletId={walletId} onSelected={addToLibrary} onClose={() => { setSelectedItem(null); } } />}
+                <AddToLibraryDialog item={selectedItem} walletId={walletId} onSelected={addToLibrary} onClose={() => { setSelectedItem(null); }} />}
 
             {/**  TODO: handle how to buy music nfts education here*/}
-            {imageData && imageData.length == 0 && <div>No NFTs found</div>}
+            {nftData && nftData.length == 0 && <div>No NFTs found</div>}
 
 
             <ImageList
@@ -283,12 +299,11 @@ export function NFTImageList({ walletId, userId }: { walletId: string; userId: s
                     // Promote the list into its own layer in Chrome. This costs memory, but helps keeping high FPS.
                     transform: 'translateZ(0)',
                 }}
-                cols={imageData.length === 1 ? 1 : (smallPhone ? 1 : (minWidthDesktop ? 3 : 2))}
+                cols={nftData.length === 1 ? 1 : (smallPhone ? 1 : (minWidthDesktop ? 3 : 2))}
                 // rowHeight={200}
                 gap={1}
-
             >
-                {imageData && imageData.length > 0 && imageData.map((item) => {
+                {nftData && nftData.length > 0 && nftData.map((item) => {
                     // const cols = item.featured ? 2 : 1;
                     // const rows = item.featured ? 2 : 1;
                     const cols = 1;
@@ -321,6 +336,12 @@ export function NFTImageList({ walletId, userId }: { walletId: string; userId: s
                     );
                 })}
             </ImageList>
+
+            {hasMore && (
+                <button onClick={() => setPage(prevPage => prevPage + 1)}>
+                    Load More
+                </button>
+            )}
         </>
     );
 }

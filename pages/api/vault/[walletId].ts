@@ -16,12 +16,11 @@ type Item = {
     // session or oauth resource access is ok...
   const session = await unstable_getServerSession(req, res, authOptions)
 
-  // TODO reactivate session guard
   if (!session) {
     res.status(401).json({ message: "You must be logged in." });
     return;
   }
-  const { walletId } = req.query
+  const { walletId, page } = req.query
 
   if(!walletId){
     return res.status(400).json({
@@ -41,16 +40,17 @@ type Item = {
     params: {
       wallet: walletId,
       omitFields: ["provenance", "traits"],
-      page: 1,
-      perPage: 10,
+      page,
+      perPage: 20,
     },
   };
   // TODO noticed collection name is Unknown for all Solana nfts.. 
   const result = await axios
     .post(process.env.QUICK_NODE_URL as string, data, config)
 
-  // we can check on server side if a token is a darkblock -- one call here to determine that
-  
-  return res.json(result.data.result.assets)
+
+  const dataResult = result.data.result;
+
+  return res.json(dataResult)
 }
 
