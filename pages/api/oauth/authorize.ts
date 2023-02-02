@@ -50,8 +50,9 @@ export default async function authorize(req: NextApiRequest, res: NextApiRespons
 
     // Redirect back to redirect_uri with `code` and `state` as url query params.
     const response = await authorizationServer.completeAuthorizationRequest(authRequest);
-    res.status(response.status);
-    res.redirect(response.headers.location);
+    // console.log(JSON.stringify(response))
+    // res.status(response.status);
+    res.redirect(response.status, response.headers.location);
   } catch (e) {
     console.error(e)
     handleError(e, res);
