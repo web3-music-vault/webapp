@@ -15,7 +15,7 @@ const scopeRepository = inMemoryScopeRepository;
 const userRepository = inMemoryUserRepository;
 
 // TODO is this the secret?
-const jwtService = new JwtService("secret secret secret");
+const jwtService = new JwtService(process.env.JWSERVICE_SECRET);
 
 const authorizationServer = new AuthorizationServer(
   authCodeRepository,
