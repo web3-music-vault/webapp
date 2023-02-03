@@ -87,7 +87,7 @@ export const dbAccessTokenRepository: OAuthTokenRepository = {
 
 
     return <OAuthToken>{
-      accessToken: uuid.v4(),
+      accessToken: getRandomName(),
       accessTokenExpiresAt: oneHourInFuture,
       refreshTokenExpiresAt: oneYearInFuture,
       client,
@@ -144,7 +144,7 @@ export const dbAccessTokenRepository: OAuthTokenRepository = {
   },
   async issueRefreshToken(token): Promise<OAuthToken> {
     console.log('OAuthTokenRepository.issueRefreshToken(token=', token)
-    const refreshToken = uuid.v4();
+    const refreshToken = getRandomName();
     const refreshTokenExpiresAt = new DateInterval("360d").getEndDate();
     // const refreshTokenExpiresAt = null
 
@@ -182,6 +182,18 @@ export const dbAccessTokenRepository: OAuthTokenRepository = {
   },
 };
 
+
+const getRandomName = () => {
+  let hexString = uuid.v4();
+  console.log("hex:   ", hexString);
+  // remove decoration
+  hexString = hexString.replace(/-/g, "");
+  let base64String = Buffer.from(hexString, 'hex').toString('base64')
+  console.log("base64:", base64String);
+  return base64String;
+}
+
+
 export const inMemoryAuthCodeRepository: OAuthAuthCodeRepository = {
   issueAuthCode(client: OAuthClient, user: OAuthUser | undefined, scopes: OAuthScope[]): OAuthAuthCode {
     const oneHourInFuture = new DateInterval("1h").getEndDate();
@@ -189,7 +201,7 @@ export const inMemoryAuthCodeRepository: OAuthAuthCodeRepository = {
     console.log('OAuthAuthCodeRepository.issueAuthCode', 'client', client, 'user', user, 'scopes', scopes)
     console.log('oneHourInFuture', oneHourInFuture)
     return {
-      code: uuid.v4(),
+      code: getRandomName(),
       user,
       client,
       redirectUri: "",
