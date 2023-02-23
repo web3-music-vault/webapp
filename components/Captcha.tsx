@@ -9,6 +9,7 @@ export function Captcha({ onHumanDetected }: { onHumanDetected: (verified: boole
     const captchaRef = useRef(null);
 
     const onLoad = () => {
+        console.log('captcha onload');
         // this reaches out to the hCaptcha JS API and runs the
         // execute function on it. you can use other functions as
         // documented here:

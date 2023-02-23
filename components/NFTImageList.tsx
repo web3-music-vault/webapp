@@ -178,7 +178,7 @@ export function NFTImageList({ walletId, userId }: { walletId: string; userId: s
         const updateData = async () => {
 
             console.log('updateData', 'updatingData', updatingData, ' prevLibraryItems.libraryItems?', prevLibraryItems.libraryItems, 'libraryItems', libraryItems, 'libraryLoading', libraryLoading, 'libraryLoaded', libraryLoaded, 'userId', userId);
-            fetch('/api/library', {
+            fetch('/api/library/', {
                 method: "POST",
                 credentials: 'same-origin',
                 body: JSON.stringify({
@@ -308,8 +308,9 @@ export function NFTImageList({ walletId, userId }: { walletId: string; userId: s
                     // const rows = item.featured ? 2 : 1;
                     const cols = 1;
                     const rows = 1;
+                    // console.log(item)
                     return (
-                        <ImageListItem key={item.imageUrl} cols={cols} rows={rows}>
+                        <ImageListItem key={item.tokenAddress} cols={cols} rows={rows}>
                             <img
                                 {...srcset(item.imageUrl, 250, 200, rows, cols)}
                                 alt={item.name}
